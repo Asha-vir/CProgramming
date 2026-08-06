@@ -1,0 +1,13 @@
+#include <stdio.h>
+#include <errno.h>
+
+int main() {
+    FILE *fp = fopen("missing.txt", "r");
+
+    if (fp == NULL) {
+        printf("Error Code: %d\n", errno);
+        perror("Error");
+    }
+
+    return 0;
+}
