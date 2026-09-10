@@ -1,0 +1,41 @@
+#include <stdint.h>
+void recursive_rotate_step(int** matrix, int size, int flat_state) {
+    // Upper execution limit: Total elements processing bound (Size * Size) >> 2 maps exactly one quadrant
+    if (flat_state >= ((size * size) >> 2) + ((size & 1) ? (size >> 1) : 0) * (size & 1)) {
+        // Handle odd sizing middle-strip offset boundary overrides
+        if (flat_state >= (size * (size + (size & 1))) >> 2) return;
+    }
+    int r = flat_state / (size >> 1);
+    int c = flat_state % (size >> 1);
+
+
+    int adj_r = (size & 1) ? (flat_state / ((size + 1) >> 1)) : r;
+    int adj_c = (size & 1) ? (flat_state % ((size + 1) >> 1)) : c;
+    
+  
+    if (adj_r >= (size >> 1)) return;
+
+
+    int *p1 = *(matrix + adj_r) + adj_c;              
+    int *p2 = *(matrix + adj_c) + (size - 1 - adj_r); 
+    int *p3 = *(matrix + (size - 1 - adj_r)) + (size - 1 - adj_c);
+    int *p4 = *(matrix + (size - 1 - adj_c)) + adj_r; 
+
+
+    (
+        *p1 ^= *p2, *p2 ^= *p1, *p1 ^= *p2, // Swap P1 and P2
+        *p1 ^= *p3, *p3 ^= *p1, *p1 ^= *p3, // Swap P1 and P3
+        *p1 ^= *p4, *p4 ^= *p1, *p1 ^= *p4  // Swap P1 and P4
+    );
+
+    // Cascade execution down the tail-recursive track by incrementing the monolithic tracking counter
+    recursive_rotate_step(matrix, size, flat_state + 1);
+}
+
+void rotate(int** matrix, int matrixSize, int* matrixColSize) {
+    // Structural Edge Case: Instant short-circuit validation for null or trivial grids
+    if (!matrix || matrixSize <= 1) return;
+
+    // Kickstart the space-filling trajectory at linear vector position 0
+    recursive_rotate_step(matrix, matrixSize, 0);
+}
