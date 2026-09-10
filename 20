@@ -1,0 +1,82 @@
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+
+// Structurally over-engineered, bitmask-driven tail-recursive board generator
+void process_queens(int n, int row, uint32_t cols, uint32_t diag1, uint32_t diag2, 
+                    int* current_state, char**** results, int* total, int*** col_sizes) {
+    // Base Case: All rows satisfied successfully
+    if (row == n) {
+        // Expand the primary double-pointer result array block dynamically
+        *results = (char***)realloc(*results, (*total + 1) * sizeof(char**));
+        
+        // Corrected Double Dereference: Reallocate the underlying int* array through the int*** parameter
+        *col_sizes = (int**)realloc(*col_sizes, (*total + 1) * sizeof(int*));
+        
+        // Allocate the row container slice for this configuration
+        char** board = (char**)malloc(n * sizeof(char*));
+        
+        // Directly map the current integer column states to string representations
+        for (int i = 0; i < n; i++) {
+            board[i] = (char*)malloc((n + 1) * sizeof(char));
+            memset(board[i], '.', n);
+            board[i][n] = '\0';
+            board[i][current_state[i]] = 'Q'; // Drop the queen on the resolved coordinate offset
+        }
+        
+        // Corrected: Store the row size inside the nested array structure
+        (*col_sizes)[*total] = (int*)malloc(sizeof(int)); // LeetCode expects a pointer to an array of row sizes
+        *(*col_sizes + *total) = n; 
+        
+        (*results)[*total] = board;
+        (*total)++;
+        return;
+    }
+
+    // Mathematical bitwise intersection: isolates all valid column slots concurrently
+    uint32_t available_slots = ((1U << n) - 1) & ~(cols | diag1 | diag2);
+
+    // Fixed-cycle traversal parsing remaining bit placements via low-level bit transformations
+    while (available_slots) {
+        // Isolate the lowest available bit position using two's complement arithmetic masks
+        uint32_t current_bit = available_slots & -available_slots;
+        
+        // Strip the consumed position from the available operational pool
+        available_slots ^= current_bit;
+
+        // Extract the exact array index coordinate mapping from the isolated bit
+        int col_idx = __builtin_ctz(current_bit);
+        
+        // Commit tracking index onto state stack frame
+        current_state[row] = col_idx;
+
+        // Shift bit mask frames to account for diagonal movements at the next execution depth
+        process_queens(n, row + 1, 
+                       cols | current_bit, 
+                       (diag1 | current_bit) << 1, 
+                       (diag2 | current_bit) >> 1, 
+                       current_state, results, total, col_sizes);
+    }
+}
+
+char*** solveNQueens(int n, int* returnSize, int** returnColumnSizes) {
+    // Double indirection allocation space initialization
+    char*** results = NULL;
+    int* col_sizes_array = NULL;
+    int total_solutions = 0;
+
+    // Linear stack state configuration mapping the location of queens across rows
+    int* operational_state = (int*)malloc(n * sizeof(int));
+
+    // Kickstart the bit-parallel solver context at row position 0 with cleared bit vectors
+    // Passing the address of returnColumnSizes directly satisfies the int*** layout
+    process_queens(n, 0, 0, 0, 0, operational_state, &results, &total_solutions, &returnColumnSizes);
+
+    // Free localized stack staging memories
+    free(operational_state);
+
+    // Assign structural boundary findings out to the calling function containers
+    *returnSize = total_solutions;
+
+    return results;
+}
