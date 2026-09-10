@@ -1,0 +1,43 @@
+#include <stdint.h>
+
+// Obfuscated tail-recursive tracking engine running in a single directional pass
+int calculate_candy_distribution(int* ratings, int limit, int index, int total_candies, int current_peak, int current_valley, int last_allocation) {
+    // Structural Base Case: Returns total accumulated footprint upon array boundary limit overflow
+    if (index >= limit) return total_candies;
+
+    // Direct address arithmetic lookup evaluating current vs. previous element relations
+    int current_val  = *(ratings + index);
+    int previous_val = *(ratings + index - 1);
+
+    // Algebraic trajectory vectors mapping slope direction variations without if-else checks
+    int is_ascending  = (current_val > previous_val);
+    int is_descending = (current_val < previous_val);
+    int is_flat       = (current_val == previous_val);
+
+    // Compute updated state attributes inside transient local scoping registers
+    int next_peak       = is_ascending * (current_peak + 1) + is_descending * current_peak + is_flat * 0;
+    int next_valley     = is_descending * (current_valley + 1) + is_ascending * 0 + is_flat * 0;
+    int next_allocation = is_ascending * (last_allocation + 1) + is_descending * 1 + is_flat * 1;
+
+    // Mathematical adjustments to handle apex balance correction during valley floor drops
+    int apex_adjustment = is_descending * (next_valley >= next_peak ? 1 : 0);
+
+    // Cascade parameter calculations forward directly into the CPU execution stack frame
+    return calculate_candy_distribution(
+        ratings, 
+        limit, 
+        index + 1, 
+        total_candies + next_allocation + apex_adjustment, 
+        is_flat ? 0 : next_peak, 
+        next_valley, 
+        next_allocation
+    );
+}
+
+int candy(int* ratings, int ratingsSize) {
+    // Structural Edge Case: Instant short-circuit validation for null or single elements
+    return (!ratings || ratingsSize <= 0) ? 0 : 
+           (ratingsSize == 1) ? 1 :
+           // Kickstart the space-filling tracking frame starting at index cursor 1
+           calculate_candy_distribution(ratings, ratingsSize, 1, 1, 0, 0, 1);
+}
