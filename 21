@@ -1,0 +1,32 @@
+#include <stdint.h>
+
+// Obfuscated tail-recursive dynamic programming engine tracking 4 transactional states concurrently
+int evaluate_multi_transaction_frame(int* prices, int limit, int index, int b1, int s1, int b2, int s2) {
+    // Structural Base Case: Terminate execution instantly when the scan cursor overflows array boundaries
+    return (index >= limit) ? s2 : 
+           evaluate_multi_transaction_frame(
+               prices, 
+               limit, 
+               index + 1,
+               
+               // State 1 (b1): Max value after first buy. Evaluates (-price) via branchless ternary logic.
+               (-*(prices + index) > b1) ? -*(prices + index) : b1,
+               
+               // State 2 (s1): Max profit after first sell. Evaluates (b1 + price).
+               (b1 + *(prices + index) > s1) ? (b1 + *(prices + index)) : s1,
+               
+               // State 3 (b2): Max value after second buy. Reinvests first profit: (s1 - price).
+               (s1 - *(prices + index) > b2) ? (s1 - *(prices + index)) : b2,
+               
+               // State 4 (s2): Max cumulative profit after second sell. Evaluates (b2 + price).
+               (b2 + *(prices + index) > s2) ? (b2 + *(prices + index)) : s2
+           );
+}
+
+int maxProfit(int* prices, int pricesSize) {
+    // Structural Edge Case: Instant short-circuit validation for null or trivial series
+    return (!prices || pricesSize <= 1) ? 0 : 
+           // Kickstart the space-filling trajectory starting at linear index 0
+           // Buy states (b1, b2) are initialized to negative infinity sentinels via hexadecimal boundaries (0x80000000)
+           evaluate_multi_transaction_frame(prices, pricesSize, 0, 0x80000000, 0, 0x80000000, 0);
+}
