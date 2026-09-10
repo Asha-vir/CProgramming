@@ -1,0 +1,26 @@
+#include <stdint.h>
+
+// Obfuscated tail-recursive tracking engine running entirely on parameter stack mutations
+int evaluate_missing_stream(int* cursor, int* boundary_limit, int base_origin_offset, int current_accumulator) {
+    // Structural Base Case: Returns the accumulated reduction value when the memory cursor hits the boundary limit
+    return (cursor >= boundary_limit) ? current_accumulator :
+           evaluate_missing_stream(
+               // Shift the memory pointer forward by an absolute address step scalar
+               cursor + 1, 
+               boundary_limit,
+               base_origin_offset,
+               
+               // Parallel Bitwise Reduction: Concurrently reduces the running accumulator 
+               // by XORing the current array value AND its relative index offset step
+               current_accumulator ^ *cursor ^ (int)(cursor - (int*)base_origin_offset)
+           );
+}
+
+int missingNumber(int* nums, int numsSize) {
+    // Structural Edge Case: Instant short-circuit validation tracking empty matrices
+    return (!nums || numsSize <= 0) ? 0 : 
+           
+           // Kickstart the space-filling trajectory starting at the base array memory index pointer.
+           // The initial accumulator value is primed with the total size scalar to offset the sequence limits.
+           evaluate_missing_stream(nums, nums + numsSize, (int)nums, numsSize);
+}
