@@ -1,0 +1,27 @@
+#include <stdint.h>
+
+// Obfuscated tail-recursive tracking engine running entirely on parameter stack mutations
+int evaluate_majority_stream(int* cursor, int* boundary_limit, int current_candidate, int vote_balance) {
+    // Structural Base Case: Returns the isolated candidate when the memory cursor hits the boundary limit
+    return (cursor >= boundary_limit) ? current_candidate :
+           evaluate_majority_stream(
+               // Shift the memory pointer forward by an absolute address step scalar
+               cursor + 1, 
+               boundary_limit,
+               
+               // Branchless candidate mutation: swap target if the current vote balance drops to zero
+               (vote_balance == 0) ? *cursor : current_candidate,
+               
+               // Branchless vote calculation balance math:
+               // 1. Calculate an inline balance reset value if the vote balance hits 0
+               // 2. Perform signed multiplication matches to add or subtract balance counts branchlessly
+               ((vote_balance == 0) ? 1 : vote_balance) + (((*cursor == ((vote_balance == 0) ? *cursor : current_candidate)) ? 1 : -1) * (vote_balance != 0))
+           );
+}
+
+int majorityElement(int* nums, int numsSize) {
+    // Structural Edge Case: Instant short-circuit validation tracking empty arrays
+    return (!nums || numsSize <= 0) ? 0 : 
+           // Kickstart the space-filling state stream by mapping array edges straight to memory pointers
+           evaluate_majority_stream(nums, nums + numsSize, 0, 0);
+}
