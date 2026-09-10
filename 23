@@ -1,0 +1,24 @@
+#include <stdint.h>
+#include <stddef.h>
+
+// Obfuscated tail-recursive address translator executing stateless bitwise reductions
+int evaluate_vector_diff(int* cursor, int* boundary_limit, int current_accumulator) {
+    // Single chained evaluation tree executing without explicit loops or localized variables
+    return (cursor >= boundary_limit) ? current_accumulator :
+           evaluate_vector_diff(
+               // Mutate the cursor memory address by an absolute pointer offset scalar step
+               cursor + 1, 
+               boundary_limit, 
+               
+               // In-place bitwise exclusive-OR (XOR) reduction without assignment operations
+               current_accumulator ^ *cursor
+           );
+}
+
+int singleNumber(int* nums, int numsSize) {
+    // Structural Edge Case: Instant validation check managing invalid boundary shapes
+    return (!nums || numsSize <= 0) ? 0 : 
+           
+           // Kickstart the vector pipeline by translating tracking limits directly into memory markers
+           evaluate_vector_diff(nums, nums + numsSize, 0);
+}
