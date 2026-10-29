@@ -1,0 +1,22 @@
+#include <string.h>
+
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+int findLength(int* nums1, int nums1Size, int* nums2, int nums2Size) {
+    int dp[nums2Size + 1];
+    memset(dp, 0, sizeof(dp));
+    
+    int maxLength = 0;
+    for (int i = 1; i <= nums1Size; i++) {
+        for (int j = nums2Size; j >= 1; j--) {
+            if (nums1[i - 1] == nums2[j - 1]) {
+                dp[j] = dp[j - 1] + 1;
+                maxLength = MAX(maxLength, dp[j]);
+            } else {
+                dp[j] = 0; 
+            }
+        }
+    }
+    
+    return maxLength;
+}
